@@ -1,4 +1,3 @@
-
 public class Person {
 
 	private String name, surname, job;
@@ -31,5 +30,22 @@ public class Person {
 	
 	public void setJob(String job) {
 		this.job = job;
+	}
+	
+	/** Represent this object as JSON */
+	public String toJSON(String tab) {
+		StringBuilder json = new StringBuilder();
+		
+		json.append(tab + "{");
+		json.append("\n" + tab + "\t\"name\": " + getName());
+		json.append("\n" + tab + "\t\"surname\": " + getSurname());
+		json.append("\n" + tab + "\t\"job\": " + getJob());
+		json.append(tab + "\n}\n");
+		
+		return json.toString();
+	}
+	
+	public String toJSON() {
+		return toJSON("");
 	}
 }

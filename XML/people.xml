@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<people xmlns="http://webis.de/people">
+    <person>
+        <name>Bob</name>
+        <surname>Marley</surname>
+        <job>Singer</job>
+    </person>
+</people>

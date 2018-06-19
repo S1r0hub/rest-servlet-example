@@ -1,8 +1,5 @@
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -15,13 +12,13 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet implementation class RestServlet
  */
-@WebServlet("/RestServlet")
+@WebServlet("/people")
 public class RestServlet extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 	
 	// List of persons
-	private static List<Person> persons = new ArrayList<>();
+	private static People people = new People();
 	
        
     /**
@@ -37,10 +34,12 @@ public class RestServlet extends HttpServlet {
 	 */
 	public void init(ServletConfig config) throws ServletException {
 		// add some default persons
+		/*
 		persons.add(new Person("Bob", "Marley", "Singer"));
 		persons.add(new Person("Elvis", "Presley", "Singer"));
 		persons.add(new Person("Kobe", "Bryant", "Basketball Player"));
 		persons.add(new Person("Alan Mathison", "Turing", " Computer Scientist, Mathematician, Logician, Cryptanalyst"));
+		*/
 	}
 
 	/**
@@ -48,13 +47,18 @@ public class RestServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
-		PrintWriter pw = response.getWriter();
-		pw.write("I'm here.");
-		pw.close();
-		
+		/*
 		// add all the persons to the attribute "persons"
-		//request.setAttribute("persons", "value");
-		//request.getRequestDispatcher("page.jsp").forward(request, response);
+		request.setAttribute("persons", "value");
+		request.getRequestDispatcher("page.jsp").forward(request, response);
+		*/
+		
+		// set the content type of the response to return JSON
+		response.setContentType("application/json");
+		
+		PrintWriter pw = response.getWriter();
+		pw.append("...");
+		pw.close();
 	}
 
 	/**
