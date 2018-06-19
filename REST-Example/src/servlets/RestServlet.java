@@ -1,3 +1,4 @@
+package servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -7,6 +8,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBException;
+
+import helpers.PersonenModel;
 
 
 /**
@@ -17,31 +21,26 @@ public class RestServlet extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 	
-	// List of persons
-	private static People people = new People();
+	// prepare the model that holds the data and represents the personen.xml document
+	private static PersonenModel model = new PersonenModel("personen.xsd", "personen.xml");
 	
-       
+    
     /**
      * @see HttpServlet#HttpServlet()
      */
     public RestServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
+    
 	/**
 	 * @see Servlet#init(ServletConfig)
 	 */
 	public void init(ServletConfig config) throws ServletException {
-		// add some default persons
-		/*
-		persons.add(new Person("Bob", "Marley", "Singer"));
-		persons.add(new Person("Elvis", "Presley", "Singer"));
-		persons.add(new Person("Kobe", "Bryant", "Basketball Player"));
-		persons.add(new Person("Alan Mathison", "Turing", " Computer Scientist, Mathematician, Logician, Cryptanalyst"));
-		*/
+		// nothing to do
 	}
 
+	
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -53,14 +52,25 @@ public class RestServlet extends HttpServlet {
 		request.getRequestDispatcher("page.jsp").forward(request, response);
 		*/
 		
-		// set the content type of the response to return JSON
-		response.setContentType("application/json");
+		PrintWriter responseWriter = response.getWriter();
 		
-		PrintWriter pw = response.getWriter();
-		pw.append("...");
-		pw.close();
+		// set the content type of the response to return JSON
+		response.setContentType("application/xml");
+		response.setCharacterEncoding("UTF-8");
+
+		try {
+			response.setStatus(HttpServletResponse.SC_OK);
+			model.marshal(responseWriter);
+		} catch (JAXBException e) {
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			responseWriter.println("Marshalling failed!");
+		}
+
+		responseWriter.close();
 	}
 
+	
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -69,6 +79,7 @@ public class RestServlet extends HttpServlet {
 		doGet(request, response);
 	}
 
+	
 	/**
 	 * @see HttpServlet#doPut(HttpServletRequest, HttpServletResponse)
 	 */
@@ -76,6 +87,7 @@ public class RestServlet extends HttpServlet {
 		// TODO Auto-generated method stub
 	}
 
+	
 	/**
 	 * @see HttpServlet#doDelete(HttpServletRequest, HttpServletResponse)
 	 */
