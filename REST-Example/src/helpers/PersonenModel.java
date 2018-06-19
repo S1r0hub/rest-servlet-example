@@ -130,6 +130,17 @@ public class PersonenModel {
     }
     
     
+    /** Get a reference to the person with a specific id. */
+    public PersonType getPerson(int id) {
+    	for (PersonType person : getPersonen().getPerson()) {
+    		if (person.getId() == id) {
+    			return person;
+    		}
+    	}
+    	throw new IndexOutOfBoundsException("Person not found!");
+    }
+    
+    
     /** Adds a new person */
     public void addPerson(int id, String name, String surname, String birthday, List<String> jobs) { 
     	

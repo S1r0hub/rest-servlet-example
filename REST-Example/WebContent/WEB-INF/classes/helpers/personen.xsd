@@ -26,4 +26,5 @@
             <xsd:field xpath="@id" />
         </xsd:unique>
     </xsd:element>
+    <xsd:element name="person" type="PersonType"/>
 </xsd:schema>

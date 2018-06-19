@@ -8,15 +8,18 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import helpers.PersonenModel;
+import jaxb.ObjectFactory;
+import jaxb.PersonType;
 
 
 /**
  * Servlet implementation class RestServlet
  */
-@WebServlet("/people")
+@WebServlet("/people/*")
 public class RestServlet extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
@@ -52,19 +55,45 @@ public class RestServlet extends HttpServlet {
 		request.getRequestDispatcher("page.jsp").forward(request, response);
 		*/
 		
+		System.out.println(request.getPathInfo());
+		
 		PrintWriter responseWriter = response.getWriter();
 		
 		// set the content type of the response to return JSON
 		response.setContentType("application/xml");
 		response.setCharacterEncoding("UTF-8");
+		
+		boolean getAll = true;
+		JAXBElement<PersonType> singlePerson = null;
+		String path = request.getPathInfo();
+		
+		if (path != null && path.matches("/1")) {
+			getAll = false;
+			singlePerson = new ObjectFactory().createPerson(model.getPerson(1));
+		}
 
 		try {
 			response.setStatus(HttpServletResponse.SC_OK);
-			model.marshal(responseWriter);
-		} catch (JAXBException e) {
+			
+			if (getAll) {
+				model.marshal(responseWriter);
+			}
+			else {
+				if (singlePerson == null) {
+					throw new IndexOutOfBoundsException("Person not found!");
+				}
+				model.marshal(singlePerson, responseWriter);
+			}
+		}
+		catch (JAXBException e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			responseWriter.println("Marshalling failed!");
+		}
+		catch (IndexOutOfBoundsException e) {
+			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			responseWriter.println(e.getMessage());
 		}
 
 		responseWriter.close();
