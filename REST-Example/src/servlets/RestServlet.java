@@ -1,4 +1,5 @@
 package servlets;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -63,19 +64,32 @@ public class RestServlet extends HttpServlet {
 		response.setContentType("application/xml");
 		response.setCharacterEncoding("UTF-8");
 		
-		boolean getAll = true;
+		int id = -1;
 		JAXBElement<PersonType> singlePerson = null;
-		String path = request.getPathInfo();
 		
-		if (path != null && path.matches("/1")) {
-			getAll = false;
-			singlePerson = new ObjectFactory().createPerson(model.getPerson(1));
+		// ^/(0|[1-9]+[0-9]*)/.*$
+		
+		if (request.getPathInfo() != null) {
+			//String[] pathSplit = request.getPathInfo().split("^/(0|[1-9]+[0-9]*)/.*$");
+			String[] pathSplit = request.getPathInfo().split("/");
+			
+			if (pathSplit.length > 0) {
+				try {
+					// get the id and replace the slash
+					id = Integer.parseInt(pathSplit[1].replaceAll("/", ""));
+					singlePerson = new ObjectFactory().createPerson(model.getPerson(id));
+				}
+				catch (NumberFormatException e) {
+					System.err.println("Could not parse id (" + id + ")!");
+				}
+			}
 		}
 
 		try {
 			response.setStatus(HttpServletResponse.SC_OK);
 			
-			if (getAll) {
+			// get all persons if id is negative
+			if (id < 0) {
 				model.marshal(responseWriter);
 			}
 			else {
