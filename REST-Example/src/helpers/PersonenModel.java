@@ -130,8 +130,10 @@ public class PersonenModel {
     }
     
     
-    /** Get a reference to the person with a specific id. */
-    public PersonType getPerson(int id) {
+    /** Get a reference to the person with a specific id.
+     * @throws IndexOutOfBoundsException */
+    public PersonType getPerson(int id)
+    throws IndexOutOfBoundsException {
     	for (PersonType person : getPersonen().getPerson()) {
     		if (person.getId() == id) {
     			return person;
