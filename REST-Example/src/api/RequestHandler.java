@@ -11,7 +11,21 @@ import helpers.PersonenModel;
 
 public abstract class RequestHandler {
 
-	public abstract void handleRequest(HttpServletRequest request, HttpServletResponse response, PersonenModel model, int id)
+	private final PersonenModel model;
+	
+
+	public RequestHandler(PersonenModel model) {
+		this.model = model;
+	}
+	
+	
+	/** Get the model */
+	public PersonenModel getModel() {
+		return model;
+	}
+
+	
+	public abstract void handleRequest(HttpServletRequest request, HttpServletResponse response, int id)
 	throws ServletException, IOException;
 	
 	

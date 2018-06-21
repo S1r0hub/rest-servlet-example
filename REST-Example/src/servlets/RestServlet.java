@@ -90,7 +90,7 @@ public class RestServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		new GetRequestHandler().handleRequest(request, response, model, id);
+		new GetRequestHandler(model).handleRequest(request, response, id);
 	}
 
 	
@@ -107,7 +107,7 @@ public class RestServlet extends HttpServlet {
 	 * @see HttpServlet#doPut(HttpServletRequest, HttpServletResponse)
 	 */
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		new PutRequestHandler().handleRequest(request, response, model, id);
+		new PutRequestHandler(model).handleRequest(request, response, id);
 	}
 
 	

@@ -21,8 +21,14 @@ import jaxb.PersonType;
  */
 public class GetRequestHandler extends RequestHandler {
 
+	
+	public GetRequestHandler(PersonenModel model) {
+		super(model);
+	}
+
+	
 	@Override
-	public void handleRequest(HttpServletRequest request, HttpServletResponse response, PersonenModel model, int id)
+	public void handleRequest(HttpServletRequest request, HttpServletResponse response, int id)
 	throws ServletException, IOException {
 		
 		// get writer and set the content type of the response to be XML
@@ -32,16 +38,15 @@ public class GetRequestHandler extends RequestHandler {
 		
 		// the returned element (the person)
 		JAXBElement<?> jaxbElementOut = null;
-		String error = "Element not found!";
 		
 		if (id >= 0) {
 			try {
 				// get person by id
-				PersonType person = model.getPerson(id);
+				PersonType person = getModel().getPerson(id);
 				jaxbElementOut = new ObjectFactory().createPerson(person);
 			}
 			catch (IndexOutOfBoundsException e) {
-				error = "Person with id (" + id + ") does not exist!";
+				String error = "Person with id (" + id + ") does not exist!";
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 				responseWriter.println(failureMessage(error));
 				return;
@@ -52,19 +57,20 @@ public class GetRequestHandler extends RequestHandler {
 		try {
 			response.setStatus(HttpServletResponse.SC_OK);
 			
-			if (id > 0) {
+			if (id >= 0) {
 				// return the person
-				model.marshal(jaxbElementOut, responseWriter);
+				getModel().marshal(jaxbElementOut, responseWriter);
 			}
 			else {
 				// return all people
-				model.marshal(responseWriter);
+				getModel().marshal(responseWriter);
 			}
 		}
 		catch (JAXBException e) {
 			e.printStackTrace();
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			responseWriter.println(failureMessage("Marshalling failed!"));
+			responseWriter.close();
 		}
 	}
 	

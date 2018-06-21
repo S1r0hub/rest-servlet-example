@@ -78,13 +78,14 @@ public class Marshalling {
 	
 
     /** Validates a content object against the schema using the Marshaller instance. */
-    public void validate(Object contentObject, Class<?> context_type) {
+    public void validate(Object jaxbObject, Class<?> context_type)
+    throws JAXBException {
         try {
             Validator validator = xml_schema.newValidator();
-            JAXBSource jaxbSource = new JAXBSource(getMarshaller(), contentObject);
+            JAXBSource jaxbSource = new JAXBSource(getMarshaller(), jaxbObject);
             validator.validate(jaxbSource);
         } catch (JAXBException | SAXException | IOException e) {
-            throw new RuntimeException("Could not validate object", e);
+            throw new JAXBException("Validating object failed!", e);
         }
     }
 }
