@@ -61,7 +61,7 @@ public class RestServlet extends HttpServlet {
 		// get the single parts of the URL/path
 		String[] pathSplit = RequestHandler.parsePath(request.getPathInfo());
 		
-		if (pathSplit.length > 0) {
+		if (pathSplit.length == 2) {
 			try {
 				// get the id and remove the slash
 				id = Integer.parseInt(pathSplit[1]);
@@ -73,6 +73,13 @@ public class RestServlet extends HttpServlet {
 				responseWriter.println(error);
 				return;
 			}
+		}
+		else if (pathSplit.length > 2) {
+			String message = "Not Found!";
+			String error = RequestHandler.failureMessage(message);
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			responseWriter.println(error);
+			return;
 		}
 		
 		super.service(request, response);
