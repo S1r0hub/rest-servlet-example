@@ -67,7 +67,7 @@ public class RestServlet extends HttpServlet {
 				id = Integer.parseInt(pathSplit[1]);
 			}
 			catch (NumberFormatException e) {
-				String message = "Failed to parse id (\" + id + \")! Wrong type.";
+				String message = "Failed to parse id (" + pathSplit[1] + ")! Wrong type.";
 				String error = RequestHandler.failureMessage(message);
 				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 				responseWriter.println(error);

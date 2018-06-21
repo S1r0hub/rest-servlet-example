@@ -52,11 +52,12 @@ public class GetRequestHandler extends RequestHandler {
 		try {
 			response.setStatus(HttpServletResponse.SC_OK);
 			
-			// return the person if positive, all people if negative
 			if (id > 0) {
+				// return the person
 				model.marshal(jaxbElementOut, responseWriter);
 			}
 			else {
+				// return all people
 				model.marshal(responseWriter);
 			}
 		}
