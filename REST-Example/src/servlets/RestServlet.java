@@ -1,6 +1,8 @@
 package servlets;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -10,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import api.GetRequestHandler;
 import api.PutRequestHandler;
+import api.RequestHandler;
 import helpers.PersonenModel;
 
 
@@ -23,6 +26,8 @@ public class RestServlet extends HttpServlet {
 	
 	// prepare the model that holds the data and represents the personen.xml document
 	private static PersonenModel model = new PersonenModel("personen.xsd", "personen.xml");
+	
+	private int id = -1;
 	
     
     /**
@@ -41,11 +46,44 @@ public class RestServlet extends HttpServlet {
 	}
 
 	
+	@Override
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		PrintWriter responseWriter = response.getWriter();
+		
+		// set the content type of the response to return XML
+		response.setContentType("application/xml");
+		response.setCharacterEncoding("UTF-8");
+		
+		// set default of id to be negative
+		id = -1;
+		
+		// get the single parts of the URL/path
+		String[] pathSplit = RequestHandler.parsePath(request.getPathInfo());
+		
+		if (pathSplit.length > 0) {
+			try {
+				// get the id and remove the slash
+				id = Integer.parseInt(pathSplit[1]);
+			}
+			catch (NumberFormatException e) {
+				String message = "Failed to parse id (\" + id + \")! Wrong type.";
+				String error = RequestHandler.failureMessage(message);
+				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+				responseWriter.println(error);
+				return;
+			}
+		}
+		
+		super.service(request, response);
+	}
+
+
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		new GetRequestHandler().handleRequest(request, response, model);
+		new GetRequestHandler().handleRequest(request, response, model, id);
 	}
 
 	
@@ -62,7 +100,7 @@ public class RestServlet extends HttpServlet {
 	 * @see HttpServlet#doPut(HttpServletRequest, HttpServletResponse)
 	 */
 	protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		new PutRequestHandler().handleRequest(request, response, model);
+		new PutRequestHandler().handleRequest(request, response, model, id);
 	}
 
 	

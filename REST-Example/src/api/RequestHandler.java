@@ -11,7 +11,7 @@ import helpers.PersonenModel;
 
 public abstract class RequestHandler {
 
-	public abstract void handleRequest(HttpServletRequest request, HttpServletResponse response, PersonenModel model)
+	public abstract void handleRequest(HttpServletRequest request, HttpServletResponse response, PersonenModel model, int id)
 	throws ServletException, IOException;
 	
 	
@@ -63,4 +63,5 @@ public abstract class RequestHandler {
 		
 		return xml.toString();
 	}
+	
 }
