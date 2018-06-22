@@ -27,7 +27,7 @@ public class RestServlet extends HttpServlet {
 	// prepare the model that holds the data and represents the personen.xml document
 	private static PersonenModel model = new PersonenModel("personen.xsd", "personen.xml");
 	
-	private int id = -1;
+	private String id = null;
 	
     
     /**
@@ -56,31 +56,30 @@ public class RestServlet extends HttpServlet {
 		response.setCharacterEncoding("UTF-8");
 		
 		// set default of id to be negative
-		id = -1;
+		id = null;
 		
 		// get the single parts of the URL/path
-		String[] pathSplit = RequestHandler.parsePath(request.getPathInfo());
+		String path = request.getPathInfo();
+		String[] pathSplit = RequestHandler.parsePath(path);
 		
 		if (pathSplit.length == 2) {
-			try {
-				// get the id and remove the slash
-				id = Integer.parseInt(pathSplit[1]);
-			}
-			catch (NumberFormatException e) {
-				String message = "Failed to parse id (" + pathSplit[1] + ")! Wrong type.";
-				String error = RequestHandler.failureMessage(message);
-				response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-				responseWriter.println(error);
-				return;
-			}
+			id = pathSplit[1];
+			if (id.isEmpty()) { id = null; }
 		}
 		else if (pathSplit.length > 2) {
-			String message = "Not Found!";
+			String message = "Invalid path!";
 			String error = RequestHandler.failureMessage(message);
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			responseWriter.println(error);
 			return;
 		}
+		
+		// print request information to the console
+		System.out.println(
+			"[" + request.getMethod() + "] " +
+			"Path: " + (path != null ? path : "/") + " , " +
+			"Client: " + request.getRemoteAddr()
+		);
 		
 		super.service(request, response);
 	}

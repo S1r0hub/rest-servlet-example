@@ -11,6 +11,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import helpers.PersonenModel;
 import jaxb.PersonType;
+import jaxb.Personen;
 
 
 /**
@@ -27,7 +28,7 @@ public class PutRequestHandler extends RequestHandler {
 
 
 	@Override
-	public void handleRequest(HttpServletRequest request, HttpServletResponse response, int id)
+	public void handleRequest(HttpServletRequest request, HttpServletResponse response, String id)
 	throws ServletException, IOException {
 
 		// get writer and set the content type of the response to be XML
@@ -36,53 +37,71 @@ public class PutRequestHandler extends RequestHandler {
 		response.setCharacterEncoding("UTF-8");
 		
 		try {
-			if (id < 0) {
+			if (id == null) {
 				// replace the whole collection
-				// TODO
+				replaceCollection(request, response);
 			}
 			else {
-				// replace a person (item of the collection)
-				if (getModel().existsPerson(id)) {
-					
-					try {
-						// replace person data and validate it
-						replacePerson(id, request.getReader());
-						
-						// marshal the XML-Document (save changes to the file)
-						getModel().marshal();
-					}
-					catch (Exception e) {
-						//e.printStackTrace();
-						throw new Exception("Marshalling failed. (" + e.getMessage() + ")");
-					}
-					
-					// redirect the client to the created person
-					//String address = request.getContextPath() + request.getServletPath() + "/" + id;
-					System.out.println("Client replaced person with id (" + id + ") successfully.\nRedirecting...");
-					
-					// redirect and change method to GET
-					//response.setStatus(HttpServletResponse.SC_SEE_OTHER);
-					//response.setHeader("Location", address);
-					
-					// TODO: works for now, maybe change it do a redirect later
-					new GetRequestHandler(getModel()).handleRequest(request, response, id);
-				}
+				// replace a person (single item of the collection)
+				replacePerson(id, request, response);
 			}
 		}
 		catch (Exception e) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			responseWriter.println(failureMessage(e.getMessage()));
 		}
-		
 	}
 	
 	
-	/** Replace an existing person using the passed body data. */
-	private void replacePerson(int id, BufferedReader data)
+	/** Replace existing person. */
+	private void replacePerson(String id, HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
 		
-		// validate the data
+		boolean replaced = false;
+		
+		// check if person exists
+		if (getModel().existsPerson(id)) {
+			// replace person data and validate it
+			replacePerson(id, request.getReader());
+			replaced = true;
+		}
+		else {
+			// add person data and validate it
+			//addPerson(id, request.getReader());
+			new PostRequestHandler(getModel()).addPerson(id, request.getReader());
+		}
+		
+		// marshal the XML-Document (save changes to the file)
+		try {
+			getModel().marshal();
+		}
+		catch (Exception e) {
+			throw new Exception("Marshalling failed. (" + e.getMessage() + ")");
+		}
+		
+		// print information to console
+		if (replaced) {
+			System.out.println("Person replaced (" + id + ").");
+		}
+		else {
+			System.out.println("Person added (" + id + ").");
+		}
+		
+		// redirect and change method to GET
+		//response.setStatus(HttpServletResponse.SC_SEE_OTHER);
+		//response.setHeader("Location", address);
+		
+		// TODO: works for now, maybe change it to a redirect later
+		new GetRequestHandler(getModel()).handleRequest(request, response, id);
+	}
+	
+	/** Replace an existing person using the passed body data. */
+	public void replacePerson(String id, BufferedReader data)
+	throws Exception {
+		
 		/*
+		// validate the XML data
+		// to use this functionality, first store the data in a String instance
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder xmlBuilder = factory.newDocumentBuilder();
 		
@@ -90,14 +109,68 @@ public class PutRequestHandler extends RequestHandler {
 		catch (Exception e) { throw new IOException("Data is invalid!"); }
 		*/
 		
+		// check if the data is available (not empty)
+		if (!data.ready()) {
+			throw new IOException("Missing body data!");
+		}
+		
 		// try to unmarshal to a Person object
-		PersonType newPerson = getModel().unmarshal(new StreamSource(data));
+		PersonType newPerson = getModel().unmarshalPerson(new StreamSource(data));
+		
+		// check that IDs match
+		if (!newPerson.getId().equals(id)) {
+			throw new Exception("IDs do not match!");
+		}
+		
 		getModel().replacePerson(id, newPerson);
 	}
 
 	
-	/** Replace an existing person using parameters. */
+	/** Replace the whole collection. */
+	private void replaceCollection(HttpServletRequest request, HttpServletResponse response)
+	throws Exception {
+		
+		// replace the collection with the body data
+		replaceCollection(request.getReader());
+		
+		// marshal the changed XML-Document (save changes to file)
+		try {
+			getModel().marshal();
+		}
+		catch (Exception e) {
+			throw new Exception("Marshalling failed. (" + e.getMessage() + ")");
+		}
+		
+		// print information that a person was replaced
+		System.out.println("Collection replaced.");
+		
+		// redirect and change method to GET
+		//response.setStatus(HttpServletResponse.SC_SEE_OTHER);
+		//response.setHeader("Location", address);
+		
+		// TODO: works for now, maybe change it to a redirect later
+		new GetRequestHandler(getModel()).handleRequest(request, response, null);
+	}
+	
+	
+	/** Replace the whole collection using the passed body data. */
+	public void replaceCollection(BufferedReader data)
+	throws Exception {
+		
+		// check if the data is available (not empty)
+		if (!data.ready()) {
+			throw new IOException("Missing body data!");
+		}
+		
+		// try to unmarshal to a "Personen" object
+		Personen newCollection = getModel().unmarshal(new StreamSource(data));
+		System.out.println("new col size = " + newCollection.getPerson().size());
+		getModel().replaceCollection(newCollection);
+	}
+	
+	
 	/*
+	// Replace an existing person using request parameters.
 	private void replacePerson(int id, HttpServletRequest request)
 	throws Exception {
 		
@@ -107,11 +180,11 @@ public class PutRequestHandler extends RequestHandler {
 		
 		// get parameters
 		String name = request.getParameter("name");
-		String surname = request.getParameter("surname");
-		String birthday = request.getParameter("birthday");
+		String surname = request.getParameter("nachname");
+		String birthday = request.getParameter("geburtstag");
 		
 		// get jobs and set default value to be nothing
-		String jobs = request.getParameter("jobs");
+		String jobs = request.getParameter("berufe");
 		if (jobs == null) { jobs = ""; }
 		
 		// add jobs separated by comma
@@ -124,4 +197,5 @@ public class PutRequestHandler extends RequestHandler {
 		getModel().replacePerson(id, name, surname, birthday, jobList);
 	}
 	*/
+	
 }

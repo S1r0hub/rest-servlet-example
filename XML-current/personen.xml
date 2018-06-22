@@ -2,6 +2,7 @@
 <!DOCTYPE xml>
 <personen>
   <person>
+    <id>person1</id>
     <name>
       <vorname>Alan</vorname> 
       <nachname>Turing</nachname>
@@ -11,6 +12,7 @@
     <beruf>Informatiker</beruf>
   </person>
   <person>
+    <id>person2</id>
     <name>
       <vorname>Judea</vorname>
       <nachname>Pearl</nachname>

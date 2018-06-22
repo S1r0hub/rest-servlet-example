@@ -21,7 +21,6 @@ import jaxb.Name;
 import jaxb.ObjectFactory;
 import jaxb.PersonType;
 import jaxb.Personen;
-import jdk.internal.org.xml.sax.SAXParseException;
 
 
 /**
@@ -36,7 +35,7 @@ public class PersonenModel {
     private final Schema schema;
     
     // main element that holds people
-    private Personen personen = new Personen();
+    private Personen people = new Personen();
     
     // instance for marshalling and unmarshalling operations
     private final Marshalling marshalling;
@@ -60,11 +59,16 @@ public class PersonenModel {
     	marshalling = new Marshalling(schema);
     	
 		// create the unmarshaller and marshaller instance
-		marshalling.createUnmarshaller(personen.getClass());
-		marshalling.createMarshaller(personen.getClass());
+		marshalling.createUnmarshaller(people.getClass());
+		marshalling.createMarshaller(people.getClass());
 		
 		// perform unmarshalling (get data from the XML-Document)
-		personen = unmarshal(document);
+		try {
+			people = unmarshal(document);
+		}
+		catch (UnmarshalException e) {
+			throw new RuntimeException("Unmarshalling XML-Document failed! (" + e.getCause().getMessage() + ")", e);
+		}
 	}
 	
 	
@@ -101,20 +105,26 @@ public class PersonenModel {
     }
     
     
-	/** Unmarshalling of the given source file. */
-	private Personen unmarshal(File source) {
+	/** Unmarshalling a collection by StreamSource. */
+	public Personen unmarshal(StreamSource source) throws UnmarshalException {
 		try {
 			return marshalling.getUnmarshaller()
-				.unmarshal(new StreamSource(source), personen.getClass())
+				.unmarshal(source, people.getClass())
 				.getValue();
 		}
 		catch (JAXBException e) {
-			throw new RuntimeException("Unmarshalling failed!", e);
+			throw new UnmarshalException("Unmarshalling failed! (" + e.getCause().getMessage() + ")", e);
 		}
 	}
 	
+	/** Unmarshalling a collection by a given file. */
+	public Personen unmarshal(File source) throws UnmarshalException {
+		return unmarshal(new StreamSource(source));
+	}
+	
+	
 	/** Unmarshalling of a person. */
-	public PersonType unmarshal(StreamSource source) throws UnmarshalException {
+	public PersonType unmarshalPerson(StreamSource source) throws UnmarshalException {
 		try {
 			return marshalling.getUnmarshaller()
 				.unmarshal(source, PersonType.class)
@@ -139,7 +149,7 @@ public class PersonenModel {
     /** Marshal this model into a writer. */
     public void marshal(PrintWriter writer)
     throws JAXBException {
-    	marshal(personen, writer);
+    	marshal(people, writer);
     }
     
     /** Marshal this model into the given XML-Document file. */
@@ -158,34 +168,27 @@ public class PersonenModel {
     
     /** Reference to the people */
     public Personen getPeople() {
-    	return personen;
+    	return people;
     }
     
     
     /** Get a reference to the person with a specific id.
      * @throws IndexOutOfBoundsException */
-    public PersonType getPerson(int id)
+    public PersonType getPerson(String id)
     throws IndexOutOfBoundsException {
     	
-    	try {
-    		return getPeople().getPerson().get(id);
-    	}
-    	catch (IndexOutOfBoundsException e) {
-    		throw new IndexOutOfBoundsException("Person not found!");
-    	}
-    	
-    	/*
-    	for (PersonType person : getPeople().getPerson()) {
-    		if (person.getId() == id) {
-    			return person;
-    		}
-    	}
-    	*/
+		for (PersonType person : getPeople().getPerson()) {
+			if (person.getId().equals(id)) {
+				return person;
+			}
+		}
+		
+		throw new IndexOutOfBoundsException("Person not found!");
     }
     
     
     /** Tells if a person with that id exists. */
-    public boolean existsPerson(int id) {
+    public boolean existsPerson(String id) {
     	try {
     		getPerson(id);
     		return true;
@@ -197,7 +200,7 @@ public class PersonenModel {
     
     
     /** Adds a new person */
-    public void addPerson(String name, String surname, String birthday, List<String> jobs) throws Exception { 
+    public void addPerson(String id, String name, String surname, String birthday, List<String> jobs) throws Exception { 
     	
     	// use factory created by jaxb to create instances
     	ObjectFactory factory = new ObjectFactory();
@@ -207,6 +210,7 @@ public class PersonenModel {
     	person_name.setVorname(name);
     	person_name.setNachname(surname);
     	
+    	person.setId(id);
     	person.setName(person_name);
     	person.setGeburtstag(birthday);
     	
@@ -216,25 +220,37 @@ public class PersonenModel {
     	}
     	
     	// check that the new person object is valid against the schema
-    	marshalling.validate(person, person.getClass());
+		JAXBElement<?> jaxbPerson = new ObjectFactory().createPerson(person);
+    	marshalling.validate(jaxbPerson, jaxbPerson.getClass());
     	
     	// add the person to the people
-    	personen.getPerson().add(person);
+    	people.getPerson().add(person);
     }
     
     /** Adds a new person without a job */
-    public void addPerson(String name, String surname, String birthday) throws Exception {
-    	addPerson(name, surname, birthday, new ArrayList<String>());
+    public void addPerson(String id, String name, String surname, String birthday) throws Exception {
+    	addPerson(id, name, surname, birthday, new ArrayList<String>());
     }
     
     /** Adds a new person with unknown birthday and without a job */
-    public void addPerson(String name, String surname) throws Exception {
-    	addPerson(name, surname, "unknown");
+    public void addPerson(String id, String name, String surname) throws Exception {
+    	addPerson(id, name, surname, "unknown");
+    }
+    
+    /** Adds a new person from a given instance */
+    public void addPerson(String id, PersonType person) throws Exception {
+    	addPerson(
+    		id,
+    		person.getName().getVorname(),
+    		person.getName().getNachname(),
+    		person.getGeburtstag(),
+    		person.getBeruf()
+    	);
     }
     
  
 	/** Replace a person by the given information. */
-	public void replacePerson(int id, String name, String surname, String birthday, List<String> jobs) throws Exception {
+	public void replacePerson(String id, String name, String surname, String birthday, List<String> jobs) throws JAXBException {
 		
 		// get person by id
 		PersonType person = getPerson(id);
@@ -245,6 +261,7 @@ public class PersonenModel {
 		new_name.setNachname(surname);
 		
 		// set person information
+		person.setId(id);
 		person.setName(new_name);
 		person.setGeburtstag(birthday);
 		
@@ -258,7 +275,8 @@ public class PersonenModel {
 	}
 	
 	/** Replace a person by another. */
-	public void replacePerson(int id, PersonType newPerson) throws Exception {
+	public void replacePerson(String id, PersonType newPerson) throws JAXBException {
+		
 		replacePerson(
 			id,
 			newPerson.getName().getVorname(),
@@ -267,4 +285,16 @@ public class PersonenModel {
 			newPerson.getBeruf()
 		);
 	}
+	
+	
+	/** Replace the whole collection of people. */
+	public void replaceCollection(Personen people) {
+		
+		// remove all previous people
+		this.people.getPerson().clear();
+		
+		// add the new collection of people
+		this.people.getPerson().addAll(people.getPerson());
+	}
+	
 }

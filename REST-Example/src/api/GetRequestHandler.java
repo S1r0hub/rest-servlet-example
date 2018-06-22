@@ -28,7 +28,7 @@ public class GetRequestHandler extends RequestHandler {
 
 	
 	@Override
-	public void handleRequest(HttpServletRequest request, HttpServletResponse response, int id)
+	public void handleRequest(HttpServletRequest request, HttpServletResponse response, String id)
 	throws ServletException, IOException {
 		
 		// get writer and set the content type of the response to be XML
@@ -39,9 +39,9 @@ public class GetRequestHandler extends RequestHandler {
 		// the returned element (the person)
 		JAXBElement<?> jaxbElementOut = null;
 		
-		if (id >= 0) {
+		if (id != null) {
 			try {
-				// get person by id
+				// get person by id and store it as a jaxbElement
 				PersonType person = getModel().getPerson(id);
 				jaxbElementOut = new ObjectFactory().createPerson(person);
 			}
@@ -57,7 +57,7 @@ public class GetRequestHandler extends RequestHandler {
 		try {
 			response.setStatus(HttpServletResponse.SC_OK);
 			
-			if (id >= 0) {
+			if (jaxbElementOut != null) {
 				// return the person
 				getModel().marshal(jaxbElementOut, responseWriter);
 			}

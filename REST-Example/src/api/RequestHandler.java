@@ -25,7 +25,7 @@ public abstract class RequestHandler {
 	}
 
 	
-	public abstract void handleRequest(HttpServletRequest request, HttpServletResponse response, int id)
+	public abstract void handleRequest(HttpServletRequest request, HttpServletResponse response, String id)
 	throws ServletException, IOException;
 	
 	
