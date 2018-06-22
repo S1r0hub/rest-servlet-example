@@ -11,7 +11,8 @@ Created with [Eclipse IDE for Java EE Developers](http://www.eclipse.org/downloa
 
 If you have a running Webserver like `Tomcat`,  
 just put the `web application archive (war)` in the according directory.  
-E.g. for Tomcat: `tomcat-root/webapps/`.  
+E.g. for Tomcat: `tomcat-root/webapps/`.
+
 Tomcat will automatically extract the archive and the servlet will be available at:  
 `http://localhost:<port>/REST/`  
 (Default port for Tomcat is `8080`)
