@@ -140,6 +140,13 @@ public class PersonenModel {
 	}
 	
 	
+	/** Marshal a collection (XML-root element) into a writer. */
+    public void marshal(Personen personen, PrintWriter writer)
+    throws JAXBException {
+    	marshalling.getMarshaller().marshal(personen, writer);
+    }
+	
+	
 	/** Marshal single JAXB-Elements into a writer. */
     public void marshal(Object jaxbElement, PrintWriter writer)
     throws JAXBException {
@@ -180,6 +187,20 @@ public class PersonenModel {
 		for (PersonType person : getPeople().getPerson()) {
 			if (person.getId().equals(id)) {
 				return person;
+			}
+		}
+		
+		throw new IndexOutOfBoundsException("Person not found!");
+    }
+    
+    
+    /** Get the index of the person with the id. */
+    public int getPersonIndex(String id)
+    throws IndexOutOfBoundsException {
+    	
+		for (int i = 0; i < getPeople().getPerson().size(); i++) {
+			if (getPeople().getPerson().get(i).getId().equals(id)) {
+				return i;
 			}
 		}
 		
@@ -297,4 +318,72 @@ public class PersonenModel {
 		this.people.getPerson().addAll(people.getPerson());
 	}
 	
+	
+	/**
+	 * Deletes a person from the collection.
+	 * 
+	 * @return A copy of the deleted person.
+	 * @throws IndexOutOfBoundsException if the person does not exist
+	 * */
+	public PersonType deletePerson(String id)
+	throws IndexOutOfBoundsException {
+		
+		// get index and create a copy of the element
+		int personIndex = getPersonIndex(id);
+		PersonType person = getPeople().getPerson().get(personIndex);
+		PersonType copy = copyItem(person);
+		
+		// remove from collection
+		this.people.getPerson().remove(personIndex);
+		
+		return copy;
+	}
+	
+	
+	/**
+	 * Deletes the whole collection.
+	 * 
+	 * @return A copy of the deleted collection.
+	 */
+	public Personen deleteCollection() {
+		
+		Personen copy = copyCollection(getPeople());
+		
+		// remove all people
+		getPeople().getPerson().clear();
+		
+		return copy;
+	}
+	
+	
+	
+	/** Creates a copy of a person. */
+	public PersonType copyItem(PersonType person) {
+		
+		PersonType copy = new ObjectFactory().createPersonType();
+		
+		Name name = new ObjectFactory().createName();
+		name.setVorname(person.getName().getVorname());
+		name.setNachname(person.getName().getNachname());
+		
+		copy.setId(person.getId());
+		copy.setGeburtstag(person.getGeburtstag());
+		copy.setName(name);
+		
+		return copy;
+	}
+	
+	
+	/** Create a copy of the whole collection. */
+	public Personen copyCollection(Personen people) {
+		
+		Personen copy = new ObjectFactory().createPersonen();
+		
+		// copy all the people
+		for (PersonType person : people.getPerson()) {
+			copy.getPerson().add(copyItem(person));
+		}
+		
+		return copy;
+	}
 }

@@ -16,7 +16,7 @@ import jaxb.Personen;
 
 /**
  * PUT-Request Handler<br/>
- * 1. Replace the entire collection with another collection.
+ * 1. Replace the entire collection with another collection.<br/>
  * 2. Replace the addressed member of the collection, or if it does not exist, create it.
  */
 public class PutRequestHandler extends RequestHandler {
@@ -95,7 +95,10 @@ public class PutRequestHandler extends RequestHandler {
 		new GetRequestHandler(getModel()).handleRequest(request, response, id);
 	}
 	
-	/** Replace an existing person using the passed body data. */
+	/**
+	 * Replace an existing person using the passed body data.<br/>
+	 * (Will not write changes to the XML-Document)
+	 */
 	public void replacePerson(String id, BufferedReader data)
 	throws Exception {
 		
@@ -126,7 +129,7 @@ public class PutRequestHandler extends RequestHandler {
 	}
 
 	
-	/** Replace the whole collection. */
+	/** Replace the whole collection (write to XML-Document). */
 	private void replaceCollection(HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
 		
@@ -153,7 +156,10 @@ public class PutRequestHandler extends RequestHandler {
 	}
 	
 	
-	/** Replace the whole collection using the passed body data. */
+	/**
+	 * Replace the whole collection using the passed body data.
+	 * (Will not write changes to the XML-Document)
+	 */
 	public void replaceCollection(BufferedReader data)
 	throws Exception {
 		

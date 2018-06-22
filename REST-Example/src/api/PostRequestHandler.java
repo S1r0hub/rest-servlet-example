@@ -82,7 +82,8 @@ public class PostRequestHandler extends RequestHandler {
 	
 	
 	/**
-	 * Add a new person using the passed body data.
+	 * Add a new person to the collection using the passed body data.<br/>
+	 * (Will not write changes to the XML-Document)
 	 * @param id - can be null
 	 * @return The id of the added person
 	 */
