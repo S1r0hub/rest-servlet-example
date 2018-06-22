@@ -238,9 +238,9 @@ public class PersonenModel {
     }
     
     /** Adds a new person from a given instance */
-    public void addPerson(String id, PersonType person) throws Exception {
+    public void addPerson(PersonType person) throws Exception {
     	addPerson(
-    		id,
+    		person.getId(),
     		person.getName().getVorname(),
     		person.getName().getNachname(),
     		person.getGeburtstag(),

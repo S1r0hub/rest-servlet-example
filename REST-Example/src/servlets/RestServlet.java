@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import api.GetRequestHandler;
+import api.PostRequestHandler;
 import api.PutRequestHandler;
 import api.RequestHandler;
 import helpers.PersonenModel;
@@ -97,8 +98,7 @@ public class RestServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
+		new PostRequestHandler(model).handleRequest(request, response, id);
 	}
 
 	

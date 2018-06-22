@@ -36,15 +36,15 @@ public class PostRequestHandler extends RequestHandler {
 		
 		try {
 			if (id == null) {
+				// add a person (single item of the collection)
+				addPerson(request, response);
+			}
+			else {
 				// this is generally not used
 				String error = "This method type is not allowed for the address.";
 				response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 				responseWriter.println(failureMessage(error));
 				return;
-			}
-			else {
-				// add a person (single item of the collection)
-				addPerson(id, request, response);
 			}
 		}
 		catch (Exception e) {
@@ -55,8 +55,11 @@ public class PostRequestHandler extends RequestHandler {
 
 	
 	/** Add a new person to the XML-Document. */
-	private void addPerson(String id, HttpServletRequest request, HttpServletResponse response)
+	private void addPerson(HttpServletRequest request, HttpServletResponse response)
 	throws Exception {
+		
+		// add the person to the collection
+		String id = addPerson(null, request.getReader());
 		
 		// marshal the XML-Document (save changes to the file)
 		try {
@@ -78,8 +81,12 @@ public class PostRequestHandler extends RequestHandler {
 	}
 	
 	
-	/** Add a new person using the passed body data. */
-	public void addPerson(String id, BufferedReader data)
+	/**
+	 * Add a new person using the passed body data.
+	 * @param id - can be null
+	 * @return The id of the added person
+	 */
+	public String addPerson(String id, BufferedReader data)
 	throws Exception {
 		
 		// check if the data is available (not empty)
@@ -90,11 +97,14 @@ public class PostRequestHandler extends RequestHandler {
 		// try to unmarshal to a Person object
 		PersonType newPerson = getModel().unmarshalPerson(new StreamSource(data));
 		
-		// check that IDs match
-		if (!newPerson.getId().equals(id)) {
+		// check that IDs match if the id is given
+		if (id != null && !newPerson.getId().equals(id)) {
 			throw new Exception("IDs do not match!");
 		}
 		
-		getModel().addPerson(id, newPerson);
+		// add person to collection
+		getModel().addPerson(newPerson);
+		
+		return newPerson.getId();
 	}
 }
