@@ -15,12 +15,12 @@ E.g. for Tomcat: `tomcat-root/webapps/`.
 
 Tomcat will automatically extract the archive and the servlet will be available at:  
 `http://localhost:<port>/REST/`  
-(Default port for Tomcat is `8080`)
+(Default port of Tomcat is `8080`)
 
 The servlet is called `people` so that the address to the collection is:  
 `http://localhost:<port>/REST/people`
 
-Everything will be stored in the `personen.xml` file located in:
+Everything will be stored in the `personen.xml` file located in:  
 `REST/WEB-INF/classes/helpers/`  
 You will also find the according XML-Schema file there.
 
