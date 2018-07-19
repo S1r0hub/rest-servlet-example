@@ -31,7 +31,7 @@ You will also find the according XML-Schema file there.
 
 #### Setup
 
-1. Open Eclipse JEE
+1. Open [Eclipse JEE](https://www.eclipse.org/downloads/packages/eclipse-ide-java-ee-developers/photonr)
 2. Import -> Existing Projects into Workspace
 3. Select the folder of this repository
 4. Finish
